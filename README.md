@@ -78,7 +78,7 @@ Early development.
 
 - **Linux**
     - If the project was updated (or freshly installed) since the last run (or this is the first run), execute `dotnet restore`.
-    - Launch `start.sh` (be sure to add the execute permission bit).
+    - Launch `start.sh` (be sure to add the execute permission bit! Also ensure the line endings have correctly loaded in as LF, not CRLF!).
     - Connect to the path you set up in your primary web server.
 
 ### Licensing

@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using FreneticMediaServer.MediaTypes;
 using Microsoft.Extensions.Primitives;
 using System.Threading;
+using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 
 namespace FreneticMediaServer
 {
@@ -87,6 +88,11 @@ namespace FreneticMediaServer
 
         public User ReadUserFile(string name)
         {
+            name = name.ToLowerInvariant();
+            if (!ValidateCleanTextInputLine(name))
+            {
+                return null;
+            }
             lock (PickUserLockFor(name))
             {
                 if (KnownUsers.TryGetValue(name, out User usr))
@@ -106,7 +112,12 @@ namespace FreneticMediaServer
 
         public User GetUser(string name)
         {
-            return KnownUsers.GetOrAdd(name.ToLowerInvariant(), ReadUserFile);
+            name = name.ToLowerInvariant();
+            if (!ValidateCleanTextInputLine(name))
+            {
+                return null;
+            }
+            return KnownUsers.GetOrAdd(name, ReadUserFile);
         }
 
         public void ApplyConfigSetting(string setting, string value)
@@ -221,8 +232,107 @@ namespace FreneticMediaServer
             {
                 return false;
             }
+            if (!ValidateCleanTextInputLine(category))
+            {
+                return false;
+            }
+            if (!ValidateCleanTextInputLine(file))
+            {
+                return false;
+            }
+            if (!ValidateCleanTextInputLine(ext.Replace('.', '_')))
+            {
+                return false;
+            }
             SetupHttpHeaders(context, 200);
             await Write(context, type.GenerateHtmlPageFor(category, file, ext));
+            return true;
+        }
+
+        public MetaFile GetMetaFor(string category, string file)
+        {
+            string metaFile = MetaFilePath + category + "/" + file + ".meta";
+            if (File.Exists(metaFile))
+            {
+                return new MetaFile(File.ReadAllText(metaFile, EncodingUTF8));
+            }
+            return null;
+        }
+
+        public async Task<bool> HandlePage_Any_Delete(HttpContext context, string subPath, string code)
+        {
+            subPath = subPath.ToLowerInvariant();
+            int slash_index = subPath.IndexOf('/');
+            if (slash_index < 1)
+            {
+                return false;
+            }
+            string category = subPath.Substring(0, slash_index);
+            string file_with_ext = subPath.Substring(slash_index + 1);
+            if (file_with_ext.Contains('/'))
+            {
+                return false;
+            }
+            int ext_index = file_with_ext.IndexOf('.');
+            if (ext_index < 1)
+            {
+                return false;
+            }
+            string file = file_with_ext.Substring(0, ext_index);
+            string ext = file_with_ext.Substring(ext_index + 1);
+            if (!KnownMediaTypes.TryGetValue(ext, out MediaType type))
+            {
+                return false;
+            }
+            if (!ValidateCleanTextInputLine(category))
+            {
+                return false;
+            }
+            if (!ValidateCleanTextInputLine(file))
+            {
+                return false;
+            }
+            if (!ValidateCleanTextInputLine(ext.Replace('.', '_')))
+            {
+                return false;
+            }
+            MetaFile meta = GetMetaFor(category, file);
+            if (meta == null)
+            {
+                return false;
+            }
+            if (context.Request.Method == "POST")
+            {
+                if (SecurityHelper.CheckHashValidity(meta.DeleteCode, code))
+                {
+                    string deletedCategoryPath = MetaFilePath + ".deleted/" + category + "/" + file + "/";
+                    ClaimMetaFilePath(deletedCategoryPath, (path, fid) =>
+                    {
+                        meta.DeleteTime = DateTimeOffset.Now;
+                        File.WriteAllText(path, meta.FileOutputString(), EncodingUTF8);
+                        File.Move(RawFilePath + category + "/" + file + "." + ext, deletedCategoryPath + fid + "." + ext);
+                        File.Delete(MetaFilePath + category + "/" + file + ".meta");
+                    });
+                    SetupHttpHeaders(context, 200);
+                    await Write(context, HtmlHelper.BasicHeaderWithTitle("Delete File"));
+                    await Write(context, "<h1>Deleted.</h1>");
+                    await Write(context, HtmlHelper.BasicFooter());
+                }
+                else
+                {
+                    SetupHttpHeaders(context, 200);
+                    await Write(context, HtmlHelper.BasicHeaderWithTitle("Delete File"));
+                    await Write(context, "<h1>Refused. (Invalid code?)</h1>");
+                    await Write(context, HtmlHelper.BasicFooter());
+                }
+            }
+            else
+            {
+                SetupHttpHeaders(context, 200);
+                await Write(context, HtmlHelper.BasicHeaderWithTitle("Delete File"));
+                await Write(context, HtmlHelper.OneButtonForm("/d/" + category + "/" + file_with_ext, "code", code, "Confirm File Delete"));
+                await Write(context, HtmlHelper.BasicFooter());
+            }
             return true;
         }
 
@@ -254,23 +364,22 @@ namespace FreneticMediaServer
             await Write(context, "fail=" + error);
         }
 
-        public string SaveUploadFile(MetaFile metaFile, string category, string extension, byte[] data)
+        public void ClaimMetaFilePath(string directoryPath, Action<string, string> writeMetaFile)
         {
-            string metaFileString = metaFile.FileOutputString();
+            Directory.CreateDirectory(directoryPath);
             int current_length = 3;
             string fileID = RandomHexID(current_length);
             int attempts = 0;
-            string metaPathPrefix = MetaFilePath + category + "/";
-            string dotExt = "." + extension;
+            string metaPathPrefix = directoryPath + "/";
             while (true)
             {
-                string path = metaPathPrefix + fileID + dotExt;
+                string path = metaPathPrefix + fileID + ".meta";
                 Object lockObject = PickFileLockFor(fileID);
                 lock (lockObject)
                 {
                     if (!File.Exists(path))
                     {
-                        File.WriteAllText(path, metaFileString);
+                        writeMetaFile(path, fileID);
                         break;
                     }
                 }
@@ -286,7 +395,19 @@ namespace FreneticMediaServer
                 }
                 fileID = RandomHexID(current_length);
             }
-            string rawPath = RawFilePath + category + "/" + fileID + dotExt;
+        }
+
+        public string SaveUploadFile(MetaFile metaFile, string category, string extension, byte[] data)
+        {
+            string fileID = null;
+            ClaimMetaFilePath(MetaFilePath + category, (path, fid) =>
+            {
+                fileID = fid;
+                metaFile.GenerateDeleteCode();
+                File.WriteAllText(path, metaFile.FileOutputString(), EncodingUTF8);
+            });
+            string rawPath = RawFilePath + category + "/" + fileID + "." + extension;
+            Directory.CreateDirectory(RawFilePath + category);
             File.WriteAllBytes(rawPath, data);
             return fileID;
         }
@@ -314,6 +435,11 @@ namespace FreneticMediaServer
                     return;
                 }
                 string extension = filename.Substring(indexDot + 1);
+                if (!ValidateCleanTextInputLine(extension.Replace('.', '_')))
+                {
+                    await HandlePage_Error(context, 400, "data");
+                    return;
+                }
                 if (!context.Request.Form.TryGetValue("uploader_id", out StringValues uploader_id_val)
                     || !context.Request.Form.TryGetValue("uploader_verification", out StringValues uploader_verification_val)
                     || !context.Request.Form.TryGetValue("file_category", out StringValues file_category_val)
@@ -325,6 +451,16 @@ namespace FreneticMediaServer
                 string uploaderID = uploader_id_val[0].ToLowerInvariant();
                 string category = file_category_val[0].ToLowerInvariant();
                 string description = description_val[0];
+                if (!ValidateCleanTextInputLine(uploaderID))
+                {
+                    await HandlePage_Error(context, 400, "data");
+                    return;
+                }
+                if (!ValidateCleanTextInputLine(category))
+                {
+                    await HandlePage_Error(context, 400, "data");
+                    return;
+                }
                 User user = GetUser(uploaderID);
                 if (user == null)
                 {
@@ -364,7 +500,7 @@ namespace FreneticMediaServer
                 }
                 MetaFile metaFile = new MetaFile(uploaderID, description, filename);
                 string fileID = SaveUploadFile(metaFile, category, extension, uploadedData);
-                await Write(context, "success=" + category + "/" + fileID + "." + extension + ";" + metaFile.DeleteCode);
+                await Write(context, "success=" + category + "/" + fileID + "." + extension + ";" + metaFile.DeleteCode_Clean);
                 return;
             }
             catch (Exception ex)
@@ -379,6 +515,11 @@ namespace FreneticMediaServer
             }
         }
 
+        public byte[] GetBytesFor(string rootFile)
+        {
+            return File.Exists("./wwwroot/" + rootFile) ? File.ReadAllBytes("./wwwroot/" + rootFile) : null;
+        }
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             LoadConfig();
@@ -387,6 +528,12 @@ namespace FreneticMediaServer
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+            }
+            byte[] dat_robots = GetBytesFor("robots.txt");
+            byte[] dat_favicon = GetBytesFor("favicon.ico");
             app.Run(async (context) =>
             {
                 if (context.Request.Path.HasValue)
@@ -396,6 +543,26 @@ namespace FreneticMediaServer
                         if (await HandlePage_Get_FileView(context, context.Request.Path.Value.Substring("/i/".Length)))
                         {
                             return;
+                        }
+                    }
+                    if (context.Request.Path.Value.StartsWith("/d/"))
+                    {
+                        if (context.Request.Method == "POST")
+                        {
+                            if (context.Request.HasFormContentType && context.Request.Form.TryGetValue("code", out StringValues code_val))
+                            {
+                                if (await HandlePage_Any_Delete(context, context.Request.Path.Value.Substring("/d/".Length), code_val[0]))
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        else if (context.Request.Query.TryGetValue("delete_code", out StringValues code))
+                        {
+                            if (await HandlePage_Any_Delete(context, context.Request.Path.Value.Substring("/d/".Length), code))
+                            {
+                                return;
+                            }
                         }
                     }
                     else if (context.Request.Path.Value.StartsWith("/generate_code"))
@@ -411,7 +578,24 @@ namespace FreneticMediaServer
                         if (context.Request.Method == "POST" && context.Request.HasFormContentType)
                         {
                             await HandlePage_Post_Upload(context);
+                            return;
                         }
+                    }
+                    else if (context.Request.Path.Value.StartsWith("/error"))
+                    {
+                        // TODO!
+                    }
+                    else if (context.Request.Path.Value.StartsWith("/robots.txt"))
+                    {
+                        context.Response.ContentType = "text/plain";
+                        context.Response.Body.Write(dat_robots);
+                        return;
+                    }
+                    else if (context.Request.Path.Value.StartsWith("/favicon.ico"))
+                    {
+                        context.Response.ContentType = "image/x-icon";
+                        context.Response.Body.Write(dat_favicon);
+                        return;
                     }
                 }
                 await HandlePage_404(context);
