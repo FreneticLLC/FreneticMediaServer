@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>FreneticMediaServer</RootNamespace>
+    <AssemblyName>FreneticMediaServer</AssemblyName>
+    <LangVersion>Latest</LangVersion>
+    <Company>Frenetic LLC</Company>
+    <Product>FreneticMediaServer</Product>
+    <PackageId>FreneticMediaServer</PackageId>
+    <Copyright>Copyright (C) Frenetic LLC 2018</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

@@ -221,7 +221,7 @@ namespace FreneticMediaServer
             {
                 return false;
             }
-            int ext_index = file_with_ext.IndexOf('.');
+            int ext_index = file_with_ext.LastIndexOf('.');
             if (ext_index < 1)
             {
                 return false;
@@ -273,7 +273,7 @@ namespace FreneticMediaServer
             {
                 return false;
             }
-            int ext_index = file_with_ext.IndexOf('.');
+            int ext_index = file_with_ext.LastIndexOf('.');
             if (ext_index < 1)
             {
                 return false;
@@ -428,7 +428,7 @@ namespace FreneticMediaServer
                     return;
                 }
                 string filename = file.FileName;
-                int indexDot = filename.IndexOf('.');
+                int indexDot = filename.LastIndexOf('.');
                 if (indexDot < 1)
                 {
                     await HandlePage_Error(context, 400, "file_type");
