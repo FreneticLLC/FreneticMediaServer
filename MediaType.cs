@@ -14,7 +14,13 @@ namespace FreneticMediaServer
 
         public string HtmlSafe(string text)
         {
-            return text.Replace("&", "&amp;").Replace("\r", "").Replace("<", "&lt;").Replace(">", "&gt;").Replace("$", "&#36;");
+            return text.Replace("&", "&amp;").Replace("\r", "").Replace("<", "&lt;").Replace(">", "&gt;").Replace("$", "&#36;").Replace("\"", "&quot;");
+        }
+
+        public string TextifyBasic(DateTimeOffset date)
+        {
+            return date.Year + "/" + date.Month.ToString().PadLeft(2, '0') + "/" + date.Day.ToString().PadLeft(2, '0')
+                + " " + date.Hour.ToString().PadLeft(2, '0') + ":" + date.Minute.ToString().PadLeft(2, '0') + ":" + date.Second.ToString().PadLeft(2, '0');
         }
 
         public string Textify(DateTimeOffset date)
@@ -28,9 +34,7 @@ namespace FreneticMediaServer
             {
                 offset = "+" + date.Offset.Hours.ToString().PadLeft(2, '0');
             }
-            return date.Year + "/" + date.Month.ToString().PadLeft(2, '0') + "/" + date.Day.ToString().PadLeft(2, '0')
-                + " " + date.Hour.ToString().PadLeft(2, '0') + ":" + date.Minute.ToString().PadLeft(2, '0') + ":" + date.Second.ToString().PadLeft(2, '0')
-                + "<span class=\"minor_date_info\">" + " UTC" + offset + "</span>";
+            return TextifyBasic(date) + "<span class=\"minor_date_info\">" + " UTC" + offset + "</span>";
         }
 
         public string GenerateBasePage(MetaFile meta, string rawLink, string imageLink, string embedText)
@@ -51,6 +55,7 @@ namespace FreneticMediaServer
             page = page.Replace("$TYPE$", HtmlSafe(Name));
             page = page.Replace("$DESCRIPTION$", HtmlSafe(meta.Description).Replace("\n", "\n<br>"));
             page = page.Replace("$DATE$", Textify(meta.Time));
+            page = page.Replace("$DATE_SHORT$", TextifyBasic(meta.Time));
             page = page.Replace("$UPLOADER$", HtmlSafe(meta.Uploader));
             page = page.Replace("$CONTACT_EMAIL$", HtmlSafe(Server.ContactEmail));
             page = page.Replace("$FILE_EMBED$", embedText);
