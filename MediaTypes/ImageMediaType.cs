@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace FreneticMediaServer.MediaTypes
 {
@@ -20,6 +23,29 @@ namespace FreneticMediaServer.MediaTypes
         {
             // TODO
             throw new NotImplementedException();
+        }
+
+        public override byte[] Recrunch(string extension, byte[] input)
+        {
+            if (!Server.RebuildImages)
+            {
+                return input;
+            }
+            using (MemoryStream inputStream = new MemoryStream(input))
+            {
+                Image image = Image.FromStream(inputStream);
+                while (image.PropertyIdList.Length != 0)
+                {
+                    image.RemovePropertyItem(image.PropertyIdList[0]);
+                }
+                using (MemoryStream outputStream = new MemoryStream())
+                {
+                    image.Save(outputStream, ImageFormat.Png);
+                    outputStream.Flush();
+                    outputStream.Seek(0, SeekOrigin.Begin);
+                    return outputStream.ToArray();
+                }
+            }
         }
     }
 }

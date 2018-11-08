@@ -33,6 +33,8 @@ namespace FreneticMediaServer
 
         public string RawFilePath = null;
 
+        public bool RebuildImages = true;
+
         public void ConfigureServices(IServiceCollection services)
         {
         }
@@ -130,6 +132,9 @@ namespace FreneticMediaServer
                 case "meta_file_path":
                     MetaFilePath = value;
                     break;
+                case "rebuild_images":
+                    RebuildImages = value.ToLowerInvariant() == "true";
+                    break;
                 case "raw_file_path":
                     RawFilePath = value;
                     break;
@@ -188,7 +193,7 @@ namespace FreneticMediaServer
 
         public void EstablishMediaHandlers()
         {
-            RegisterMediaType(new ImageMediaType());
+            RegisterMediaType(new ImageMediaType() { Server = this });
             // TODO: animation (gif)
             // TODO: video (mp4, webm, mpeg, avi)
             // TODO: audio (mp3, wav, ogg)
@@ -397,8 +402,9 @@ namespace FreneticMediaServer
             }
         }
 
-        public string SaveUploadFile(MetaFile metaFile, string category, string extension, byte[] data)
+        public string SaveUploadFile(MetaFile metaFile, string category, string extension, MediaType type, byte[] data)
         {
+            data = type.Recrunch(extension, data);
             string fileID = null;
             ClaimMetaFilePath(MetaFilePath + category, (path, fid) =>
             {
@@ -502,7 +508,7 @@ namespace FreneticMediaServer
                 context.Request.HttpContext.Connection.RemoteIpAddress
                 + " OR " + context.Request.Headers["REMOTE_ADDR"]
                 + " OR " + context.Request.Headers["X-Forwarded-For"]);
-                string fileID = SaveUploadFile(metaFile, category, extension, uploadedData);
+                string fileID = SaveUploadFile(metaFile, category, extension, type, uploadedData);
                 await Write(context, "success=" + category + "/" + fileID + "." + extension + ";" + metaFile.DeleteCode_Clean);
                 return;
             }
