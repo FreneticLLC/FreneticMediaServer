@@ -37,6 +37,7 @@ namespace FreneticMediaServer
         {
             string page = Startup.Page_Ref_FileView;
             page = page.Replace("$NAME$", HtmlSafe(meta.OriginalName));
+            page = page.Replace("$TYPE$", HtmlSafe(Name));
             page = page.Replace("$DESCRIPTION$", HtmlSafe(meta.Description).Replace("\n", "\n<br>"));
             page = page.Replace("$DATE$", Textify(meta.Time));
             page = page.Replace("$UPLOADER$", HtmlSafe(meta.Uploader));
