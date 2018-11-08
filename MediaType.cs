@@ -50,7 +50,10 @@ namespace FreneticMediaServer
                 "<link rel=\"image_src\" href=\"" + imageLink + "\">"
                 + "<meta name=\"image\" content=\"" + imageLink + "\">"
                 + "<meta name=\"og:image\" content=\"" + imageLink + "\">"
-                + "<meta name=\"twitter:image\" content=\"" + imageLink + "\">";
+                + "<meta name=\"twitter:image\" content=\"" + imageLink + "\">"
+                + "<meta property=\"image\" content=\"" + imageLink + "\">"
+                + "<meta property=\"og:image\" content=\"" + imageLink + "\">"
+                + "<meta property=\"twitter:image\" content=\"" + imageLink + "\">";
             }
             string page = Startup.Page_Ref_FileView;
             page = page.Replace("$NAME$", HtmlSafe(meta.OriginalName));
