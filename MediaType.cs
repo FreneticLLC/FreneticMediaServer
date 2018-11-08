@@ -33,8 +33,19 @@ namespace FreneticMediaServer
                 + "<span class=\"minor_date_info\">" + " UTC" + offset + "</span>";
         }
 
-        public string GenerateBasePage(MetaFile meta, string rawLink, string embedText)
+        public string GenerateBasePage(MetaFile meta, string rawLink, string imageLink, string embedText)
         {
+            string headers;
+            if (imageLink == null)
+            {
+                headers = "";
+            }
+            else
+            {
+                headers = "<meta name=\"image\" content=\"imageLink\">"
+                + "<meta name=\"og:image\" content=\"imageLink\">"
+                + "<meta name=\"twitter:image\" content=\"imageLink\">";
+            }
             string page = Startup.Page_Ref_FileView;
             page = page.Replace("$NAME$", HtmlSafe(meta.OriginalName));
             page = page.Replace("$TYPE$", HtmlSafe(Name));
@@ -44,6 +55,7 @@ namespace FreneticMediaServer
             page = page.Replace("$CONTACT_EMAIL$", HtmlSafe(Server.ContactEmail));
             page = page.Replace("$FILE_EMBED$", embedText);
             page = page.Replace("$RAW_LINK$", rawLink);
+            page = page.Replace("$IMAGE_HEADERS$", headers);
             return page;
         }
 
