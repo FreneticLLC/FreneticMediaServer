@@ -1,0 +1,57 @@
+<!doctype HTML>
+<html>
+	<head>
+		<title>$NAME$ - $TYPE$ - Frenetic Media Server</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="/css/bootstrap.min.css" />
+		<style>
+			body {
+				padding-top: 60px;
+			}
+			.offset_up {
+				position: relative;
+				bottom: 50px;
+			}
+		</style>
+	</head>
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+			<a class="navbar-brand" href="#top">Frenetic Media Server</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarColor01">
+				<ul class="smooth-scroll navbar-nav mr-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="/">Home</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/About">About</a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		<a class="offset_up" id="top"></a>
+		<div class="text-center">
+			<h1>$NAME$</h1>
+			<p class="lead">$TYPE$. Uploaded $DATE$ by $UPLOADER$.</p>
+			<span class="text-muted">Description:<br/>"</span>$DESCRIPTION$<span class="text-muted">"</span>
+			<div class="jumbotron">
+				$FILE_EMBED$
+			</span>
+		</div>
+		<hr />
+		<footer>
+			<div class="text-center">
+				<p>
+					Website contains user-uploaded content (media files and their metadata) and is the property of the uploader, not the website owner.
+					<br />If dangerous, copyrighted, or illegal content is found on this website: please contact <code>$CONTACT_EMAIL$</code> with a link to the relevant content and your reason for requesting it be taken down.
+					<br />
+					<br />Frenetic Media Server built by mcmonkey and the Frenetic LLC team.
+					<br />Copyright (C) 2018 Frenetic LLC, All Rights Reserved.
+				</p>
+			</div>
+		</footer>
+	</body>
+</html>

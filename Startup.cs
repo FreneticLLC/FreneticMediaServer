@@ -20,6 +20,10 @@ namespace FreneticMediaServer
     {
         public static readonly UTF8Encoding EncodingUTF8 = GeneralHelpers.EncodingUTF8;
 
+        public static byte[] Page_Error = EncodingUTF8.GetBytes("<!doctype HTML><html><head><title>Error!</title></head><body>An error occurred.</body></html>");
+
+        public static string Page_Ref_FileView = File.ReadAllText("./page_ref.html", EncodingUTF8);
+
         public static void LogWarning(string message)
         {
             Console.WriteLine(DateTime.Now.ToString() + " [Warning] " + message);
@@ -34,6 +38,8 @@ namespace FreneticMediaServer
         public string RawFilePath = null;
 
         public bool RebuildImages = true;
+
+        public string ContactEmail = null;
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -137,6 +143,9 @@ namespace FreneticMediaServer
                     break;
                 case "raw_file_path":
                     RawFilePath = value;
+                    break;
+                case "support_email":
+                    ContactEmail = value;
                     break;
                 case "global_max_file_size":
                     long? parsedFileSize = GeneralHelpers.ParseFileSizeLimit(value);
@@ -249,8 +258,13 @@ namespace FreneticMediaServer
             {
                 return false;
             }
+            MetaFile meta = GetMetaFor(category, file);
+            if (meta == null)
+            {
+                return false;
+            }
             SetupHttpHeaders(context, 200);
-            await Write(context, type.GenerateHtmlPageFor(category, file, ext));
+            await Write(context, type.GenerateHtmlPageFor(category, file, ext, meta));
             return true;
         }
 
@@ -543,6 +557,7 @@ namespace FreneticMediaServer
             }
             byte[] dat_robots = GetBytesFor("robots.txt");
             byte[] dat_favicon = GetBytesFor("favicon.ico");
+            byte[] dat_bootstrap_css = GetBytesFor("css/bootstrap.min.css");
             app.Run(async (context) =>
             {
                 if (context.Request.Path.HasValue)
@@ -554,7 +569,7 @@ namespace FreneticMediaServer
                             return;
                         }
                     }
-                    if (context.Request.Path.Value.StartsWith("/d/"))
+                    else if (context.Request.Path.Value.StartsWith("/d/"))
                     {
                         if (context.Request.Method == "POST")
                         {
@@ -592,6 +607,9 @@ namespace FreneticMediaServer
                     }
                     else if (context.Request.Path.Value.StartsWith("/error"))
                     {
+                        context.Response.ContentType = "text/html";
+                        context.Response.Body.Write(Page_Error);
+                        return;
                         // TODO!
                     }
                     else if (context.Request.Path.Value.StartsWith("/robots.txt"))
@@ -604,6 +622,12 @@ namespace FreneticMediaServer
                     {
                         context.Response.ContentType = "image/x-icon";
                         context.Response.Body.Write(dat_favicon);
+                        return;
+                    }
+                    else if (context.Request.Path.Value.StartsWith("/css/bootstrap.min.css"))
+                    {
+                        context.Response.ContentType = "text/css";
+                        context.Response.Body.Write(dat_bootstrap_css);
                         return;
                     }
                 }

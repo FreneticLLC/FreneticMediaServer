@@ -47,6 +47,7 @@ Early development.
 - `raw_file_path`: set to the local file path to store raw files into.
 - `meta_file_path`: set to the local file path to store meta files into.
 - `raw_web_url`: set to the web URL to view the raw file.
+- `support_email`: set to an email address for support/contact (to display on pages).
 - `rebuild_images`: set to `true` or `false` for whether to rebuild any uploaded image as a new `.png` image file (if `false` images will be unmodified).
 
 ### User File Options
