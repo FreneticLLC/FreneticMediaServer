@@ -46,7 +46,9 @@ namespace FreneticMediaServer
             }
             else
             {
-                headers = "<meta name=\"image\" content=\"" + imageLink + "\">"
+                headers = 
+                "<link rel=\"image_src\" href=\"" + imageLink + "\">"
+                + "<meta name=\"image\" content=\"" + imageLink + "\">"
                 + "<meta name=\"og:image\" content=\"" + imageLink + "\">"
                 + "<meta name=\"twitter:image\" content=\"" + imageLink + "\">";
             }
