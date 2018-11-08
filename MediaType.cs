@@ -14,7 +14,7 @@ namespace FreneticMediaServer
 
         public string HtmlSafe(string text)
         {
-            return text.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;").Replace("\r", "");
+            return text.Replace("&", "&amp;").Replace("\r", "").Replace("<", "&lt;").Replace(">", "&gt;").Replace("$", "&#36;");
         }
 
         public string Textify(DateTimeOffset date)
@@ -30,10 +30,10 @@ namespace FreneticMediaServer
             }
             return date.Year + "/" + date.Month.ToString().PadLeft(2, '0') + "/" + date.Day.ToString().PadLeft(2, '0')
                 + " " + date.Hour.ToString().PadLeft(2, '0') + ":" + date.Minute.ToString().PadLeft(2, '0') + ":" + date.Second.ToString().PadLeft(2, '0')
-                + "<span class=\"minor_date_info\">" + "UTC" + offset + "</span>";
+                + "<span class=\"minor_date_info\">" + " UTC" + offset + "</span>";
         }
 
-        public string GenerateBasePage(MetaFile meta, string embedText)
+        public string GenerateBasePage(MetaFile meta, string rawLink, string embedText)
         {
             string page = Startup.Page_Ref_FileView;
             page = page.Replace("$NAME$", HtmlSafe(meta.OriginalName));
@@ -43,6 +43,7 @@ namespace FreneticMediaServer
             page = page.Replace("$UPLOADER$", HtmlSafe(meta.Uploader));
             page = page.Replace("$CONTACT_EMAIL$", HtmlSafe(Server.ContactEmail));
             page = page.Replace("$FILE_EMBED$", embedText);
+            page = page.Replace("$RAW_LINK$", rawLink);
             return page;
         }
 

@@ -21,7 +21,8 @@ namespace FreneticMediaServer.MediaTypes
 
         public override string GenerateHtmlPageFor(string category, string file, string extension, MetaFile meta)
         {
-            return GenerateBasePage(meta, "<img class=\"media_object\" src=\"" + Server.RawWebUrl + category + "/" + file + "." + extension + "\" />");
+            string rawLink = Server.RawWebUrl + category + "/" + file + "." + extension;
+            return GenerateBasePage(meta, rawLink, "<img class=\"media_object\" src=\"" + rawLink + "\" />");
         }
 
         public override byte[] Recrunch(string extension, byte[] input)

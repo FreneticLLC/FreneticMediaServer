@@ -13,6 +13,9 @@
 				position: relative;
 				bottom: 50px;
 			}
+			.raw_media_content {
+				max-height: 70vh;
+			}
 		</style>
 	</head>
 	<body>
@@ -37,7 +40,8 @@
 			<h1>$NAME$</h1>
 			<p class="lead">$TYPE$. Uploaded $DATE$ by $UPLOADER$.</p>
 			<span class="text-muted">Description:<br/>"</span>$DESCRIPTION$<span class="text-muted">"</span>
-			<div class="jumbotron">
+			<br><a href="$RAW_LINK$">View Raw</a>
+			<div class="jumbotron raw_media_content">
 				$FILE_EMBED$
 			</div>
 		</div>
