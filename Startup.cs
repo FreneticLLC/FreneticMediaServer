@@ -498,7 +498,10 @@ namespace FreneticMediaServer
                     file.CopyTo(file_stream);
                     uploadedData = file_stream.ToArray();
                 }
-                MetaFile metaFile = new MetaFile(uploaderID, description, filename);
+                MetaFile metaFile = new MetaFile(uploaderID, description, filename,
+                context.Request.HttpContext.Connection.RemoteIpAddress
+                + " OR " + context.Request.Headers["REMOTE_ADDR"]
+                + " OR " + context.Request.Headers["X-Forwarded-For"]);
                 string fileID = SaveUploadFile(metaFile, category, extension, uploadedData);
                 await Write(context, "success=" + category + "/" + fileID + "." + extension + ";" + metaFile.DeleteCode_Clean);
                 return;
