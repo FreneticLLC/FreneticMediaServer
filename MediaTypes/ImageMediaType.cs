@@ -14,6 +14,20 @@ namespace FreneticMediaServer.MediaTypes
             "jpg", "jpeg", "png"
         };
 
+        public ImageFormat FormatForExt(string ext)
+        {
+            switch (ext)
+            {
+                case "png":
+                    return ImageFormat.Png;
+                case "jpg":
+                case "jpeg":
+                    return ImageFormat.Jpeg;
+                default:
+                    return ImageFormat.Png;
+            }
+        }
+
         public override string[] GetValidExtensions()
         {
             return ValidExts;
@@ -40,7 +54,7 @@ namespace FreneticMediaServer.MediaTypes
                 }
                 using (MemoryStream outputStream = new MemoryStream())
                 {
-                    image.Save(outputStream, ImageFormat.Png);
+                    image.Save(outputStream, FormatForExt(extension));
                     outputStream.Flush();
                     outputStream.Seek(0, SeekOrigin.Begin);
                     return outputStream.ToArray();
