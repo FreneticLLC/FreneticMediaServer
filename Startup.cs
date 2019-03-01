@@ -203,7 +203,7 @@ namespace FreneticMediaServer
         public void EstablishMediaHandlers()
         {
             RegisterMediaType(new ImageMediaType() { Server = this });
-            // TODO: animation (gif)
+            RegisterMediaType(new AnimationMediaType() { Server = this });
             // TODO: video (mp4, webm, mpeg, avi)
             // TODO: audio (mp3, wav, ogg)
             // TODO: text (txt)
