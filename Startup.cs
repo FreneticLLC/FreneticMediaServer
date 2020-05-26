@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using FreneticMediaServer.MediaTypes;
 using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.Hosting;
 using System.Threading;
 using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 
@@ -543,7 +544,7 @@ namespace FreneticMediaServer
             return File.Exists("./wwwroot/" + rootFile) ? File.ReadAllBytes("./wwwroot/" + rootFile) : null;
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             LoadConfig();
             EstablishMediaHandlers();
