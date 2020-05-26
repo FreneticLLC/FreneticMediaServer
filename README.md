@@ -87,4 +87,4 @@ Early development.
 
 Likely to be released as MIT in the near future (when project is stable).
 
-Copyright (C) 2018 Frenetic LLC, All Rights Reserved.
+Copyright (C) 2018-2020 Frenetic LLC, All Rights Reserved.
