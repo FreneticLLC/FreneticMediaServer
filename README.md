@@ -5,13 +5,15 @@ A simple public media server!
 
 ### Project Status
 
-Early development.
+Primitive but functional. All the necessities work, but there's no clean home page / registration system / etc. (User registration must be done by editing config files for now).
+
+Code quality is a bit messy, as the project was written once as a vertical slice in 2018 and never really cleaned up since.
 
 ### Setup Notes
 
-- This project requires DotNetCore2.1 for both editing and running. Be sure to install that first.
+- This project requires .NET 5 for both editing and running. Be sure to install that first.
 - For production running, use a separate webserver (such as Apache) as the access point for this (internal proxy), pointing a public path to `http://localhost:8243/` as a proxy.
-    - Also, block external access to port 8243 with your firewall.
+    - Also, block external access to port `8243` with your firewall.
 - The raw file web URL is specified in the config by `raw_web_url`, and should usually be something like `i.(Site)/i/` which will then automatically have `(Category)/(File).(Ext)` append to the end.
 - This seperate file path should be handled by your main webserver, giving direct access to the files in the directory specified in the config by `raw_file_path`.
 - Do not grant public access to the directory specified in the config by `meta_file_path`.
@@ -40,6 +42,33 @@ Early development.
         - `file_type`: uploader is not allowed to upload that file type (or file type is non-existent / invalid / etc).
         - `category`: that category is not valid for the uploader.
         - `internal`: some internal issue occurred (details are not exposed to user - check server logs).
+
+### ShareX Config File
+
+- I personally upload via [ShareX](https://getsharex.com/), which is quick, easy, and convenient for the task. To configure ShareX to use FreneticMediaServer, create a file labeled `<YOUR_SERVER>.media.sxcu` with the following content:
+
+```json
+{
+  "Name": "<WEB URL HERE>",
+  "DestinationType": "ImageUploader, TextUploader, FileUploader",
+  "RequestURL": "https://<WEB URL HERE>/upload",
+  "FileFormName": "file_up",
+  "Arguments": {
+    "file_category": "misc",
+    "uploader_verification": "<PUT YOUR PASSCODE HERE>",
+    "uploader_id": "<USERNAME HERE>",
+    "description": "Uploaded by ShareX.",
+    "file_name": "$filename$"
+  },
+  "RegexList": [
+    "^success=([^;]+);(.+)$"
+  ],
+  "URL": "https://i.<WEB URL HERE>/i/$regex:1,1$",
+  "DeletionURL": "https://<WEB URL HERE>/d/$regex:1,1$?delete_code=$regex:1,2$"
+}
+```
+
+Fill in the `<WEB URL HERE>`, `<USERNAME HERE>`, and `<PUT YOUR PASSCODE HERE>` slots (be sure to remove the `<>` symbols). Replace the `misc` file category with whatever category you prefer. Optionally set the description to something custom. Don't fill in or edit any other parts.
 
 ### Main Config Options
 - `global_max_file_size`: set to the max file size limit to apply globally.
