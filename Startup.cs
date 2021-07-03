@@ -609,26 +609,25 @@ namespace FreneticMediaServer
                     else if (context.Request.Path.Value.StartsWith("/error"))
                     {
                         context.Response.ContentType = "text/html";
-                        context.Response.Body.Write(Page_Error);
+                        await context.Response.Body.WriteAsync(Page_Error);
                         return;
-                        // TODO!
                     }
                     else if (context.Request.Path.Value.StartsWith("/robots.txt"))
                     {
                         context.Response.ContentType = "text/plain";
-                        context.Response.Body.Write(dat_robots);
+                        await context.Response.Body.WriteAsync(dat_robots);
                         return;
                     }
                     else if (context.Request.Path.Value.StartsWith("/favicon.ico"))
                     {
                         context.Response.ContentType = "image/x-icon";
-                        context.Response.Body.Write(dat_favicon);
+                        await context.Response.Body.WriteAsync(dat_favicon);
                         return;
                     }
                     else if (context.Request.Path.Value.StartsWith("/css/bootstrap.min.css"))
                     {
                         context.Response.ContentType = "text/css";
-                        context.Response.Body.Write(dat_bootstrap_css);
+                        await context.Response.Body.WriteAsync(dat_bootstrap_css);
                         return;
                     }
                 }
