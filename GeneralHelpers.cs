@@ -29,7 +29,7 @@ namespace FreneticMediaServer
                     continue;
                 }
                 string setting = line.Substring(0, index_equals).Trim().ToLowerInvariant();
-                string value = line.Substring(index_equals + 1).Trim();
+                string value = line[(index_equals + 1)..].Trim();
                 yield return new KeyValuePair<string, string>(setting, value);
             }
         }
@@ -82,22 +82,22 @@ namespace FreneticMediaServer
             if (timespanText.EndsWith("S"))
             {
                 multiplier = 1;
-                timespanText = timespanText.Substring(0, timespanText.Length - 1);
+                timespanText = timespanText[0..^1];
             }
             else if (timespanText.EndsWith("M"))
             {
                 multiplier = 60;
-                timespanText = timespanText.Substring(0, timespanText.Length - 1);
+                timespanText = timespanText[0..^1];
             }
             else if (timespanText.EndsWith("H"))
             {
                 multiplier = 60 * 60;
-                timespanText = timespanText.Substring(0, timespanText.Length - 1);
+                timespanText = timespanText[0..^1];
             }
             else if (timespanText.EndsWith("D"))
             {
                 multiplier = 60 * 60 * 24;
-                timespanText = timespanText.Substring(0, timespanText.Length - 1);
+                timespanText = timespanText[0..^1];
             }
             else
             {
@@ -116,22 +116,22 @@ namespace FreneticMediaServer
             if (limitText.EndsWith("KB"))
             {
                 multiplier = 1000;
-                limitText = limitText.Substring(0, limitText.Length - 2);
+                limitText = limitText[0..^2];
             }
             else if (limitText.EndsWith("MB"))
             {
                 multiplier = 1000_000;
-                limitText = limitText.Substring(0, limitText.Length - 2);
+                limitText = limitText[0..^2];
             }
             else if (limitText.EndsWith("GB"))
             {
                 multiplier = 1000_000_000;
-                limitText = limitText.Substring(0, limitText.Length - 2);
+                limitText = limitText[0..^2];
             }
             else if (limitText.EndsWith("B"))
             {
                 multiplier = 1;
-                limitText = limitText.Substring(0, limitText.Length - 1);
+                limitText = limitText[0..^1];
             }
             else
             {

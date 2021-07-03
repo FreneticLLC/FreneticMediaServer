@@ -231,7 +231,7 @@ namespace FreneticMediaServer
                 return false;
             }
             string category = subPath.Substring(0, slash_index);
-            string file_with_ext = subPath.Substring(slash_index + 1);
+            string file_with_ext = subPath[(slash_index + 1)..];
             if (file_with_ext.Contains('/'))
             {
                 return false;
@@ -242,7 +242,7 @@ namespace FreneticMediaServer
                 return false;
             }
             string file = file_with_ext.Substring(0, ext_index);
-            string ext = file_with_ext.Substring(ext_index + 1);
+            string ext = file_with_ext[(ext_index + 1)..];
             if (!KnownMediaTypes.TryGetValue(ext, out MediaType type))
             {
                 return false;
@@ -288,7 +288,7 @@ namespace FreneticMediaServer
                 return false;
             }
             string category = subPath.Substring(0, slash_index);
-            string file_with_ext = subPath.Substring(slash_index + 1);
+            string file_with_ext = subPath[(slash_index + 1)..];
             if (file_with_ext.Contains('/'))
             {
                 return false;
@@ -299,7 +299,7 @@ namespace FreneticMediaServer
                 return false;
             }
             string file = file_with_ext.Substring(0, ext_index);
-            string ext = file_with_ext.Substring(ext_index + 1);
+            string ext = file_with_ext[(ext_index + 1)..];
             if (!KnownMediaTypes.TryGetValue(ext, out MediaType type))
             {
                 return false;
@@ -455,7 +455,7 @@ namespace FreneticMediaServer
                     await HandlePage_Error(context, 400, "file_type");
                     return;
                 }
-                string extension = filename.Substring(indexDot + 1);
+                string extension = filename[(indexDot + 1)..];
                 if (!ValidateCleanTextInputLine(extension.Replace('.', '_')))
                 {
                     await HandlePage_Error(context, 400, "data");
@@ -565,7 +565,7 @@ namespace FreneticMediaServer
                 {
                     if (context.Request.Path.Value.StartsWith("/i/"))
                     {
-                        if (await HandlePage_Get_FileView(context, context.Request.Path.Value.Substring("/i/".Length)))
+                        if (await HandlePage_Get_FileView(context, context.Request.Path.Value["/i/".Length..]))
                         {
                             return;
                         }
@@ -576,7 +576,7 @@ namespace FreneticMediaServer
                         {
                             if (context.Request.HasFormContentType && context.Request.Form.TryGetValue("code", out StringValues code_val))
                             {
-                                if (await HandlePage_Any_Delete(context, context.Request.Path.Value.Substring("/d/".Length), code_val[0]))
+                                if (await HandlePage_Any_Delete(context, context.Request.Path.Value["/d/".Length..], code_val[0]))
                                 {
                                     return;
                                 }
@@ -584,7 +584,7 @@ namespace FreneticMediaServer
                         }
                         else if (context.Request.Query.TryGetValue("delete_code", out StringValues code))
                         {
-                            if (await HandlePage_Any_Delete(context, context.Request.Path.Value.Substring("/d/".Length), code))
+                            if (await HandlePage_Any_Delete(context, context.Request.Path.Value["/d/".Length..], code))
                             {
                                 return;
                             }
