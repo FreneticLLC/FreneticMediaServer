@@ -8,7 +8,6 @@
     <Company>Frenetic LLC</Company>
     <Product>FreneticMediaServer</Product>
     <PackageId>FreneticMediaServer</PackageId>
-    <Copyright>Copyright (C) Frenetic LLC 2018-2021</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
